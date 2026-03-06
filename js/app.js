@@ -9,7 +9,7 @@ const state = {
   accounts: [],
   categories: [],
   expenses: [],
-  recurring: []
+  recurring: [],
   defaultSubjectId: localStorage.getItem('defaultSubjectId') || ''
 };
 
