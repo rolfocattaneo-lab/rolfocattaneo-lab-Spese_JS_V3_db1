@@ -20,6 +20,7 @@ async function bootstrap() {
   initMobileCollapsibles();
   setDefaultDates();
   await reloadAll();
+  window.addEventListener('resize', () => renderExpenses());
 }
 
 function bindTabs() {
@@ -85,27 +86,35 @@ function renderMobileExpenses() {
     card.innerHTML = `
       <summary>
         <div class="mobileExpenseSummary">
-          <div class="mobileExpenseTitle">${item.description || '-'}</div>
+          <div class="mobileExpenseMain">
+            <div class="mobileExpenseTitle">${item.description || '-'}</div>
+            <div class="mobileExpenseMeta">${item.expense_date || '-'} · ${item.category_name || '-'}</div>
+          </div>
           <div class="mobileExpenseAmount">${euro(item.amount)}</div>
         </div>
       </summary>
 
       <div class="mobileExpenseBody">
         <div class="mobileExpenseGrid">
-          <div><span class="muted">Data</span><strong>${item.expense_date || '-'}</strong></div>
           <div><span class="muted">Soggetto</span><strong>${item.subject_name || '-'}</strong></div>
           <div><span class="muted">Conto</span><strong>${item.account_name || '-'}</strong></div>
           <div><span class="muted">Categoria</span><strong>${item.category_name || '-'}</strong></div>
+          <div><span class="muted">Data</span><strong>${item.expense_date || '-'}</strong></div>
         </div>
 
-        ${item.notes ? `<div class="mobileExpenseNotes"><span class="muted">Note</span><div>${item.notes}</div></div>` : ''}
+        ${item.notes ? `
+          <div class="mobileExpenseNotes">
+            <span class="muted">Note</span>
+            <div>${item.notes}</div>
+          </div>
+        ` : ''}
 
         <div class="mobileExpenseAttachments">
           <span class="muted">Ricevute</span>
           <div>${renderAttachmentLinks(item.attachments)}</div>
         </div>
 
-        <div class="actions">
+        <div class="actions mobileExpenseActions">
           <button class="small" data-edit-expense="${item.id}">Modifica</button>
           <button class="small danger" data-del-expense="${item.id}">Elimina</button>
         </div>
@@ -337,7 +346,8 @@ function validateExpensePayload(payload) {
 
 function renderExpenses() {
   const tbody = $('tbodyExpenses');
-  tbody.innerHTML = '';
+  if (tbody) tbody.innerHTML = '';
+
   let total = 0;
 
   for (const item of state.expenses) {
@@ -345,17 +355,18 @@ function renderExpenses() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.expense_date}</td>
-      <td>${item.subject_name}</td>
-      <td>${item.account_name}</td>
-      <td>${item.category_name}</td>
-      <td>${item.description}</td>
-      <td class="r">${euro(item.amount)}</td>
+      <td>${item.expense_date || '-'}</td>
+      <td>${item.subject_name || '-'}</td>
+      <td>${item.account_name || '-'}</td>
+      <td>${item.category_name || '-'}</td>
+      <td class="expenseDescCell">${item.description || '-'}</td>
+      <td class="r amountCell">${euro(item.amount)}</td>
       <td>${renderAttachmentLinks(item.attachments)}</td>
-      <td class="actionsCell">
+      <td class="actionsCell r">
         <button class="small" data-edit-expense="${item.id}">Modifica</button>
         <button class="small danger" data-del-expense="${item.id}">Elimina</button>
-      </td>`;
+      </td>
+    `;
     tbody.append(tr);
   }
 
@@ -365,9 +376,11 @@ function renderExpenses() {
   tbody.querySelectorAll('[data-edit-expense]').forEach(btn =>
     btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense))
   );
+
   tbody.querySelectorAll('[data-del-expense]').forEach(btn =>
     btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense))
   );
+
   tbody.querySelectorAll('[data-open-attachment]').forEach(btn =>
     btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
   );
