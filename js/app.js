@@ -55,12 +55,28 @@ function bindActions() {
   $('btnImportCsv')?.addEventListener('click', onImportCsv);
   $('btnPreviewReport')?.addEventListener('click', onPreviewReport);
 
-  $('defaultSubjectSelect')?.addEventListener('change', (e) => {
-    setDefaultSubjectId(e.target.value || '');
-    applyDefaultSubjectToExpenseForm();
-    applyDefaultSubjectToFilters();
-    applyDefaultSubjectToReport();
-  });
+$('defaultSubjectSelect')?.addEventListener('change', (e) => {
+
+  const subjectId = e.target.value || '';
+
+  setDefaultSubjectId(subjectId);
+
+  // aggiorna nuova spesa
+  if ($('e_subject')) {
+    $('e_subject').value = subjectId;
+  }
+
+  // aggiorna filtri
+  if ($('f_subject')) {
+    $('f_subject').value = subjectId;
+  }
+
+  // aggiorna report
+  if ($('rp_subject')) {
+    $('rp_subject').value = subjectId;
+  }
+
+});
 }
 
 function initMobileCollapsibles() {
