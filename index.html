@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gestione Spese - Supabase</title>
+  <title>Gestione Spese db</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0f1220" />
@@ -36,119 +36,134 @@
 
     <section id="tab-spese" class="panel active">
       <div class="grid2">
-        <div class="card">
-          <h2>Nuova spesa</h2>
-          <div class="row2">
-            <div>
-              <label>Soggetto</label>
-              <select id="e_subject"></select>
-            </div>
-            <div>
-              <label>Conto</label>
-              <select id="e_account"></select>
-            </div>
-          </div>
-          <div class="row2">
-            <div>
-              <label>Categoria</label>
-              <select id="e_category"></select>
-            </div>
-            <div>
-              <label>Data</label>
-              <input id="e_date" type="date" />
-            </div>
-          </div>
-          <div class="row2">
-            <div>
-              <label>Descrizione</label>
-              <input id="e_desc" type="text" placeholder="Es. Esselunga" />
-            </div>
-            <div>
-              <label>Importo (€)</label>
-              <input id="e_amount" type="text" inputmode="decimal" placeholder="Es. 25,90" />
-            </div>
-          </div>
-          <div>
-            <label>Note</label>
-            <textarea id="e_notes" rows="3"></textarea>
-          </div>
-          <div>
-            <label>Ricevuta (facoltativa)</label>
-            <input id="e_attach" type="file" accept="image/*,application/pdf" />
-          </div>
+        <div class="card collapsibleCard mobileOpen" id="cardNewExpense">
+  <button class="collapsibleToggle" type="button" data-collapse-target="bodyNewExpense">
+    <span>Nuova spesa</span>
+    <span class="collapseIcon">▾</span>
+  </button>
+
+  <div class="collapsibleBody" id="bodyNewExpense">
+    <div class="row2">
+      <div>
+        <label>Soggetto</label>
+        <select id="e_subject"></select>
+      </div>
+      <div>
+        <label>Conto</label>
+        <select id="e_account"></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Categoria</label>
+        <select id="e_category"></select>
+      </div>
+      <div>
+        <label>Data</label>
+        <input id="e_date" type="date" />
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Descrizione</label>
+        <input id="e_desc" type="text" placeholder="Es. Esselunga" />
+      </div>
+      <div>
+        <label>Importo (€)</label>
+        <input id="e_amount" type="text" inputmode="decimal" placeholder="Es. 25,90" />
+      </div>
+    </div>
+    <div>
+      <label>Note</label>
+      <textarea id="e_notes" rows="3"></textarea>
+    </div>
+    <div>
+      <label>Ricevuta (facoltativa)</label>
+      <input id="e_attach" type="file" accept="image/*,application/pdf" />
+    </div>
+    <div class="actions">
+      <button id="btnAddExpense" class="primary" type="button">Salva spesa</button>
+      <button id="btnClearExpense" class="ghost" type="button">Pulisci</button>
+    </div>
+  </div>
+</div>
           <div class="actions">
             <button id="btnAddExpense" class="primary" type="button">Salva spesa</button>
             <button id="btnClearExpense" class="ghost" type="button">Pulisci</button>
           </div>
         </div>
 
-        <div class="card">
-          <h2>Filtri spese</h2>
-          <div class="row2">
-            <div>
-              <label>Da</label>
-              <input id="f_from" type="date" />
-            </div>
-            <div>
-              <label>A</label>
-              <input id="f_to" type="date" />
-            </div>
-          </div>
-          <div class="row2">
-            <div>
-              <label>Soggetto</label>
-              <select id="f_subject"></select>
-            </div>
-            <div>
-              <label>Conto</label>
-              <select id="f_account"></select>
-            </div>
-          </div>
-          <div class="row2">
-            <div>
-              <label>Categoria</label>
-              <select id="f_category"></select>
-            </div>
-            <div>
-              <label>Testo</label>
-              <input id="f_text" type="text" placeholder="Cerca nella descrizione" />
-            </div>
-          </div>
-          <div class="actions">
-            <button id="btnApplyFilters" class="primary" type="button">Applica</button>
-            <button id="btnResetFilters" class="ghost" type="button">Reset</button>
-          </div>
-          <div class="kpi">
-            <span id="kpiFiltered" class="pill">Righe: 0</span>
-            <span id="kpiTotal" class="pill ok">Totale: € 0,00</span>
-            <span id="storageBadge" class="pill warn">Storage: n/d</span>
-          </div>
-        </div>
-      </div>
+        <div class="card collapsibleCard" id="cardExpenseFilters">
+  <button class="collapsibleToggle" type="button" data-collapse-target="bodyExpenseFilters">
+    <span>Filtri spese</span>
+    <span class="collapseIcon">▾</span>
+  </button>
 
-      <div class="card">
-        <div class="split">
-          <h2>Elenco spese</h2>
-          <button id="btnRefreshExpenses" class="ghost" type="button">Aggiorna</button>
-        </div>
-        <div class="tableWrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Soggetto</th>
-                <th>Conto</th>
-                <th>Categoria</th>
-                <th>Descrizione</th>
-                <th class="r">Importo</th>
-                <th>Ricevute</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="tbodyExpenses"></tbody>
-          </table>
-        </div>
+  <div class="collapsibleBody" id="bodyExpenseFilters">
+    <div class="row2">
+      <div>
+        <label>Da</label>
+        <input id="f_from" type="date" />
       </div>
+      <div>
+        <label>A</label>
+        <input id="f_to" type="date" />
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Soggetto</label>
+        <select id="f_subject"></select>
+      </div>
+      <div>
+        <label>Conto</label>
+        <select id="f_account"></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Categoria</label>
+        <select id="f_category"></select>
+      </div>
+      <div>
+        <label>Testo</label>
+        <input id="f_text" type="text" placeholder="Cerca nella descrizione" />
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btnApplyFilters" class="primary" type="button">Applica</button>
+      <button id="btnResetFilters" class="ghost" type="button">Reset</button>
+    </div>
+    <div class="kpi">
+      <span id="kpiFiltered" class="pill">Righe: 0</span>
+      <span id="kpiTotal" class="pill ok">Totale: € 0,00</span>
+      <span id="storageBadge" class="pill warn">Storage: n/d</span>
+    </div>
+  </div>
+</div>
+      <div class="card">
+  <div class="split">
+    <h2>Elenco spese</h2>
+    <button id="btnRefreshExpenses" class="ghost" type="button">Aggiorna</button>
+  </div>
+  <div class="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Soggetto</th>
+          <th>Conto</th>
+          <th>Categoria</th>
+          <th>Descrizione</th>
+          <th class="r">Importo</th>
+          <th>Ricevute</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbodyExpenses"></tbody>
+    </table>
+  </div>
+</div>
     </section>
 
     <section id="tab-soggetti" class="panel hidden">
