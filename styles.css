@@ -655,3 +655,19 @@ dialog {
     display: block;
   }
 }
+.topbarSelect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbarSelect label {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.topbarSelect select {
+  min-width: 160px;
+}
