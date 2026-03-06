@@ -345,12 +345,18 @@ function validateExpensePayload(payload) {
 }
 
 function renderExpenses() {
+
   const tbody = $('tbodyExpenses');
   if (tbody) tbody.innerHTML = '';
 
+  // ORDINA PER DATA CRESCENTE
+  const expenses = [...state.expenses].sort(
+    (a, b) => new Date(a.expense_date) - new Date(b.expense_date)
+  );
+
   let total = 0;
 
-  for (const item of state.expenses) {
+  for (const item of expenses) {
     total += Number(item.amount || 0);
 
     const tr = document.createElement('tr');
@@ -370,7 +376,7 @@ function renderExpenses() {
     tbody.append(tr);
   }
 
-  $('kpiFiltered').textContent = `Righe: ${state.expenses.length}`;
+  $('kpiFiltered').textContent = `Righe: ${expenses.length}`;
   $('kpiTotal').textContent = `Totale: ${euro(total)}`;
 
   tbody.querySelectorAll('[data-edit-expense]').forEach(btn =>
