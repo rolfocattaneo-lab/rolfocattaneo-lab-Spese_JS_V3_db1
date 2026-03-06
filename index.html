@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestione Spese - Supabase</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0f1220" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Gestione Spese</h1>
+      <div class="muted">Versione solo database remoto</div>
+    </div>
+    <div class="topbarActions">
+      <button id="btnPing" class="ghost" type="button">Test connessione</button>
+      <span id="connectionBadge" class="pill">Non connesso</span>
+    </div>
+  </header>
+
+  <nav class="tabsBar">
+    <button class="tab active" data-tab="spese">Spese</button>
+    <button class="tab" data-tab="soggetti">Soggetti</button>
+    <button class="tab" data-tab="conti">Conti</button>
+    <button class="tab" data-tab="categorie">Categorie</button>
+    <button class="tab" data-tab="ricorrenze">Ricorrenze</button>
+    <button class="tab" data-tab="importexport">Import/Export</button>
+    <button class="tab" data-tab="report">Report</button>
+    <button class="tab" data-tab="impostazioni">Impostazioni</button>
+  </nav>
+
+  <main class="wrap">
+    <div id="appMessage" class="message hidden"></div>
+
+    <section id="tab-spese" class="panel active">
+      <div class="grid2">
+        <div class="card">
+          <h2>Nuova spesa</h2>
+          <div class="row2">
+            <div>
+              <label>Soggetto</label>
+              <select id="e_subject"></select>
+            </div>
+            <div>
+              <label>Conto</label>
+              <select id="e_account"></select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Categoria</label>
+              <select id="e_category"></select>
+            </div>
+            <div>
+              <label>Data</label>
+              <input id="e_date" type="date" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Descrizione</label>
+              <input id="e_desc" type="text" placeholder="Es. Esselunga" />
+            </div>
+            <div>
+              <label>Importo (€)</label>
+              <input id="e_amount" type="text" inputmode="decimal" placeholder="Es. 25,90" />
+            </div>
+          </div>
+          <div>
+            <label>Note</label>
+            <textarea id="e_notes" rows="3"></textarea>
+          </div>
+          <div>
+            <label>Ricevuta (facoltativa)</label>
+            <input id="e_attach" type="file" accept="image/*,application/pdf" />
+          </div>
+          <div class="actions">
+            <button id="btnAddExpense" class="primary" type="button">Salva spesa</button>
+            <button id="btnClearExpense" class="ghost" type="button">Pulisci</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Filtri spese</h2>
+          <div class="row2">
+            <div>
+              <label>Da</label>
+              <input id="f_from" type="date" />
+            </div>
+            <div>
+              <label>A</label>
+              <input id="f_to" type="date" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Soggetto</label>
+              <select id="f_subject"></select>
+            </div>
+            <div>
+              <label>Conto</label>
+              <select id="f_account"></select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Categoria</label>
+              <select id="f_category"></select>
+            </div>
+            <div>
+              <label>Testo</label>
+              <input id="f_text" type="text" placeholder="Cerca nella descrizione" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btnApplyFilters" class="primary" type="button">Applica</button>
+            <button id="btnResetFilters" class="ghost" type="button">Reset</button>
+          </div>
+          <div class="kpi">
+            <span id="kpiFiltered" class="pill">Righe: 0</span>
+            <span id="kpiTotal" class="pill ok">Totale: € 0,00</span>
+            <span id="storageBadge" class="pill warn">Storage: n/d</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="split">
+          <h2>Elenco spese</h2>
+          <button id="btnRefreshExpenses" class="ghost" type="button">Aggiorna</button>
+        </div>
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Soggetto</th>
+                <th>Conto</th>
+                <th>Categoria</th>
+                <th>Descrizione</th>
+                <th class="r">Importo</th>
+                <th>Ricevute</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyExpenses"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-soggetti" class="panel hidden">
+      <div class="grid2">
+        <div class="card">
+          <h2>Nuovo soggetto</h2>
+          <div class="row2">
+            <div>
+              <label>Nome</label>
+              <input id="s_name" type="text" />
+            </div>
+            <div>
+              <label>Email</label>
+              <input id="s_email" type="email" />
+            </div>
+          </div>
+          <div>
+            <label>Note</label>
+            <textarea id="s_notes" rows="3"></textarea>
+          </div>
+          <div class="actions">
+            <button id="btnAddSubject" class="primary" type="button">Salva soggetto</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Soggetti</h2>
+          <div class="tableWrap slim">
+            <table>
+              <thead><tr><th>Nome</th><th>Email</th><th></th></tr></thead>
+              <tbody id="tbodySubjects"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-conti" class="panel hidden">
+      <div class="grid2">
+        <div class="card">
+          <h2>Nuovo conto</h2>
+          <div class="row2">
+            <div>
+              <label>Nome</label>
+              <input id="a_name" type="text" />
+            </div>
+            <div>
+              <label>Descrizione</label>
+              <input id="a_desc" type="text" />
+            </div>
+          </div>
+          <div>
+            <label>Soggetti associati</label>
+            <select id="a_subjects" multiple size="8"></select>
+            <div class="hint">Tieni premuto CTRL o CMD per selezione multipla.</div>
+          </div>
+          <div class="actions">
+            <button id="btnAddAccount" class="primary" type="button">Salva conto</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Conti</h2>
+          <div class="tableWrap slim">
+            <table>
+              <thead><tr><th>Nome</th><th>Descrizione</th><th>Soggetti</th><th></th></tr></thead>
+              <tbody id="tbodyAccounts"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-categorie" class="panel hidden">
+      <div class="grid2">
+        <div class="card">
+          <h2>Nuova categoria</h2>
+          <div class="row2">
+            <div>
+              <label>Nome</label>
+              <input id="c_name" type="text" />
+            </div>
+            <div>
+              <label>Colore</label>
+              <input id="c_color" type="text" placeholder="#4CAF50" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Icona</label>
+              <input id="c_icon" type="text" placeholder="cart" />
+            </div>
+            <div>
+              <label>Descrizione</label>
+              <input id="c_desc" type="text" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btnAddCategory" class="primary" type="button">Salva categoria</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Categorie</h2>
+          <div class="tableWrap slim">
+            <table>
+              <thead><tr><th>Nome</th><th>Descrizione</th><th></th></tr></thead>
+              <tbody id="tbodyCategories"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-ricorrenze" class="panel hidden">
+      <div class="grid2">
+        <div class="card">
+          <h2>Nuova ricorrenza</h2>
+          <div class="row2">
+            <div>
+              <label>Soggetto</label>
+              <select id="r_subject"></select>
+            </div>
+            <div>
+              <label>Conto</label>
+              <select id="r_account"></select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Categoria</label>
+              <select id="r_category"></select>
+            </div>
+            <div>
+              <label>Frequenza</label>
+              <select id="r_frequency">
+                <option value="daily">Giornaliera</option>
+                <option value="weekly">Settimanale</option>
+                <option value="monthly" selected>Mensile</option>
+                <option value="yearly">Annuale</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Intervallo</label>
+              <input id="r_interval" type="number" min="1" value="1" />
+            </div>
+            <div>
+              <label>Data inizio</label>
+              <input id="r_start" type="date" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Data fine</label>
+              <input id="r_end" type="date" />
+            </div>
+            <div>
+              <label>Importo (€)</label>
+              <input id="r_amount" type="text" inputmode="decimal" />
+            </div>
+          </div>
+          <div>
+            <label>Descrizione</label>
+            <input id="r_desc" type="text" />
+          </div>
+          <div>
+            <label>Note</label>
+            <textarea id="r_notes" rows="3"></textarea>
+          </div>
+          <div class="actions">
+            <button id="btnAddRecurring" class="primary" type="button">Salva ricorrenza</button>
+            <button id="btnGenerateRecurring" class="ghost" type="button">Genera dovute</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Ricorrenze</h2>
+          <div class="tableWrap slim">
+            <table>
+              <thead><tr><th>Descrizione</th><th>Frequenza</th><th>Ultima</th><th></th></tr></thead>
+              <tbody id="tbodyRecurring"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-importexport" class="panel hidden">
+      <div class="grid2">
+        <div class="card">
+          <h2>Export CSV</h2>
+          <p class="muted">Esporta spese e ricorrenze dal database remoto.</p>
+          <div class="actions">
+            <button id="btnExportExpensesCsv" class="primary" type="button">Export spese</button>
+            <button id="btnExportRecurringCsv" class="ghost" type="button">Export ricorrenze</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Import CSV</h2>
+          <p class="muted">Importa file CSV nel nuovo schema. Le colonne devono rispettare il formato esportato.</p>
+          <div class="row2">
+            <div>
+              <label>Tipo</label>
+              <select id="importKind">
+                <option value="expenses">Spese</option>
+                <option value="recurring">Ricorrenze</option>
+              </select>
+            </div>
+            <div>
+              <label>File CSV</label>
+              <input id="importFile" type="file" accept=".csv,text/csv" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btnImportCsv" class="primary" type="button">Importa</button>
+          </div>
+          <div id="importResult" class="hint"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-report" class="panel hidden">
+      <div class="card">
+        <h2>Report PDF</h2>
+        <div class="row2">
+          <div>
+            <label>Da</label>
+            <input id="rp_from" type="date" />
+          </div>
+          <div>
+            <label>A</label>
+            <input id="rp_to" type="date" />
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>Soggetto</label>
+            <select id="rp_subject"></select>
+          </div>
+          <div>
+            <label>Conto</label>
+            <select id="rp_account"></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>Categoria</label>
+            <select id="rp_category"></select>
+          </div>
+          <div class="actions end stretch">
+            <button id="btnPreviewReport" class="primary" type="button">Anteprima PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-impostazioni" class="panel hidden">
+      <div class="card">
+        <h2>Configurazione</h2>
+        <p class="muted">Inserisci URL e anon key di Supabase in <code>js/config.js</code>. Il bucket allegati atteso è <code>receipts</code>.</p>
+        <ol class="compact">
+          <li>Crea le tabelle del nuovo schema.</li>
+          <li>Configura <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code>.</li>
+          <li>Crea il bucket <code>receipts</code>.</li>
+          <li>Apri l'app e usa “Test connessione”.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="editExpenseDialog">
+    <form method="dialog" class="dialogCard">
+      <h3>Modifica spesa</h3>
+      <input id="m_expense_id" type="hidden" />
+      <div class="row2">
+        <div><label>Soggetto</label><select id="m_subject"></select></div>
+        <div><label>Conto</label><select id="m_account"></select></div>
+      </div>
+      <div class="row2">
+        <div><label>Categoria</label><select id="m_category"></select></div>
+        <div><label>Data</label><input id="m_date" type="date" /></div>
+      </div>
+      <div class="row2">
+        <div><label>Descrizione</label><input id="m_desc" type="text" /></div>
+        <div><label>Importo (€)</label><input id="m_amount" type="text" inputmode="decimal" /></div>
+      </div>
+      <div><label>Note</label><textarea id="m_notes" rows="3"></textarea></div>
+      <div class="actions end">
+        <button value="cancel" class="ghost" type="button" id="btnCloseExpenseDialog">Annulla</button>
+        <button value="default" class="primary" type="button" id="btnSaveExpenseChanges">Salva modifiche</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
