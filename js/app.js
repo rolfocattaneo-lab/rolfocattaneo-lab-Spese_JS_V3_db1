@@ -34,29 +34,33 @@ function bindTabs() {
 }
 
 function bindActions() {
-  $('btnPing').addEventListener('click', testConnection);
-  $('btnAddSubject').addEventListener('click', onAddSubject);
-  $('btnAddCategory').addEventListener('click', onAddCategory);
-  $('btnAddAccount').addEventListener('click', onAddAccount);
-  $('btnAddExpense').addEventListener('click', onAddExpense);
-  $('btnClearExpense').addEventListener('click', clearExpenseForm);
-  $('btnApplyFilters').addEventListener('click', refreshExpenses);
-  $('btnResetFilters').addEventListener('click', resetExpenseFilters);
-  $('btnRefreshExpenses').addEventListener('click', refreshExpenses);
-  $('e_account').addEventListener('change', syncExpenseSubjectsForAccount);
-  $('m_account').addEventListener('change', syncEditSubjectsForAccount);
-  $('r_account').addEventListener('change', syncRecurringSubjectsForAccount);
-  $('btnSaveExpenseChanges').addEventListener('click', onSaveExpenseChanges);
-  $('btnCloseExpenseDialog').addEventListener('click', () => $('editExpenseDialog').close());
-  $('btnAddRecurring').addEventListener('click', onAddRecurring);
-  $('btnGenerateRecurring').addEventListener('click', onGenerateRecurring);
-  $('btnExportExpensesCsv').addEventListener('click', onExportExpensesCsv);
-  $('btnExportRecurringCsv').addEventListener('click', onExportRecurringCsv);
-  $('btnImportCsv').addEventListener('click', onImportCsv);
-  $('btnPreviewReport').addEventListener('click', onPreviewReport);
+  $('btnPing')?.addEventListener('click', testConnection);
+  $('btnAddSubject')?.addEventListener('click', onAddSubject);
+  $('btnAddCategory')?.addEventListener('click', onAddCategory);
+  $('btnAddAccount')?.addEventListener('click', onAddAccount);
+  $('btnAddExpense')?.addEventListener('click', onAddExpense);
+  $('btnClearExpense')?.addEventListener('click', clearExpenseForm);
+  $('btnApplyFilters')?.addEventListener('click', refreshExpenses);
+  $('btnResetFilters')?.addEventListener('click', resetExpenseFilters);
+  $('btnRefreshExpenses')?.addEventListener('click', refreshExpenses);
+  $('e_account')?.addEventListener('change', syncExpenseSubjectsForAccount);
+  $('m_account')?.addEventListener('change', syncEditSubjectsForAccount);
+  $('r_account')?.addEventListener('change', syncRecurringSubjectsForAccount);
+  $('btnSaveExpenseChanges')?.addEventListener('click', onSaveExpenseChanges);
+  $('btnCloseExpenseDialog')?.addEventListener('click', () => $('editExpenseDialog').close());
+  $('btnAddRecurring')?.addEventListener('click', onAddRecurring);
+  $('btnGenerateRecurring')?.addEventListener('click', onGenerateRecurring);
+  $('btnExportExpensesCsv')?.addEventListener('click', onExportExpensesCsv);
+  $('btnExportRecurringCsv')?.addEventListener('click', onExportRecurringCsv);
+  $('btnImportCsv')?.addEventListener('click', onImportCsv);
+  $('btnPreviewReport')?.addEventListener('click', onPreviewReport);
+
   $('defaultSubjectSelect')?.addEventListener('change', (e) => {
-  setDefaultSubjectId(e.target.value || '');
-});
+    setDefaultSubjectId(e.target.value || '');
+    applyDefaultSubjectToExpenseForm();
+    applyDefaultSubjectToFilters();
+    applyDefaultSubjectToReport();
+  });
 }
 
 function initMobileCollapsibles() {
@@ -112,75 +116,6 @@ function applyDefaultSubjectToReport() {
   if ($('rp_subject')) $('rp_subject').value = subjectId;
 }
 
-function renderMobileExpenses() {
-  const box = $('mobileExpensesList');
-  if (!box) return;
-
-  box.innerHTML = '';
-
-  if (!state.expenses.length) {
-    box.innerHTML = `<div class="mobileExpenseEmpty">Nessuna spesa trovata.</div>`;
-    return;
-  }
-
-  for (const item of state.expenses) {
-    const card = document.createElement('details');
-    card.className = 'mobileExpenseCard';
-
-    card.innerHTML = `
-      <summary>
-        <div class="mobileExpenseSummary">
-          <div class="mobileExpenseMain">
-            <div class="mobileExpenseTitle">${item.description || '-'}</div>
-            <div class="mobileExpenseMeta">${item.expense_date || '-'} · ${item.category_name || '-'}</div>
-          </div>
-          <div class="mobileExpenseAmount">${euro(item.amount)}</div>
-        </div>
-      </summary>
-
-      <div class="mobileExpenseBody">
-        <div class="mobileExpenseGrid">
-          <div><span class="muted">Soggetto</span><strong>${item.subject_name || '-'}</strong></div>
-          <div><span class="muted">Conto</span><strong>${item.account_name || '-'}</strong></div>
-          <div><span class="muted">Categoria</span><strong>${item.category_name || '-'}</strong></div>
-          <div><span class="muted">Data</span><strong>${item.expense_date || '-'}</strong></div>
-        </div>
-
-        ${item.notes ? `
-          <div class="mobileExpenseNotes">
-            <span class="muted">Note</span>
-            <div>${item.notes}</div>
-          </div>
-        ` : ''}
-
-        <div class="mobileExpenseAttachments">
-          <span class="muted">Ricevute</span>
-          <div>${renderAttachmentLinks(item.attachments)}</div>
-        </div>
-
-        <div class="actions mobileExpenseActions">
-          <button class="small" data-edit-expense="${item.id}">Modifica</button>
-          <button class="small danger" data-del-expense="${item.id}">Elimina</button>
-        </div>
-      </div>
-    `;
-
-    box.append(card);
-  }
-
-  box.querySelectorAll('[data-edit-expense]').forEach(btn =>
-    btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense))
-  );
-
-  box.querySelectorAll('[data-del-expense]').forEach(btn =>
-    btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense))
-  );
-
-  box.querySelectorAll('[data-open-attachment]').forEach(btn =>
-    btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
-  );
-}
-
 function setDefaultDates() {
   const { from, to } = todayRange();
   $('f_from').value = from;
@@ -206,12 +141,12 @@ async function testConnection() {
 
 async function reloadAll() {
   await Promise.all([reloadSubjects(), reloadCategories(), reloadAccounts(), reloadRecurring()]);
-  await refreshExpenses();
-  await refreshStorageBadge();
   renderDefaultSubjectSelect();
   applyDefaultSubjectToExpenseForm();
   applyDefaultSubjectToFilters();
   applyDefaultSubjectToReport();
+  await refreshExpenses();
+  await refreshStorageBadge();
 }
 
 async function reloadSubjects() {
@@ -283,53 +218,84 @@ function selectedAccount() {
 
 async function syncExpenseSubjectsForAccount() {
   const account = selectedAccount();
-  if (!account) return fillSelect($('e_subject'), state.subjects);
+
+  if (!account) {
+    fillSelect($('e_subject'), state.subjects);
+    applyDefaultSubjectToExpenseForm();
+    return;
+  }
+
   const rows = account.subject_ids?.length
     ? state.subjects.filter(s => account.subject_ids.includes(s.id))
     : await accountsApi.subjectsForAccount(account.id);
+
   fillSelect($('e_subject'), rows);
+
+  const defaultId = getDefaultSubjectId();
+  if (defaultId && rows.some(x => x.id === defaultId)) {
+    $('e_subject').value = defaultId;
+  }
 }
 
 async function syncEditSubjectsForAccount() {
   const accountId = $('m_account').value;
   if (!accountId) return fillSelect($('m_subject'), state.subjects);
+
   const account = state.accounts.find(x => x.id === accountId);
-  const rows = account?.subject_ids?.length ? state.subjects.filter(s => account.subject_ids.includes(s.id)) : await accountsApi.subjectsForAccount(accountId);
+  const rows = account?.subject_ids?.length
+    ? state.subjects.filter(s => account.subject_ids.includes(s.id))
+    : await accountsApi.subjectsForAccount(accountId);
+
   fillSelect($('m_subject'), rows);
 }
 
 async function syncRecurringSubjectsForAccount() {
   const accountId = $('r_account').value;
   if (!accountId) return fillSelect($('r_subject'), state.subjects);
+
   const account = state.accounts.find(x => x.id === accountId);
-  const rows = account?.subject_ids?.length ? state.subjects.filter(s => account.subject_ids.includes(s.id)) : await accountsApi.subjectsForAccount(accountId);
+  const rows = account?.subject_ids?.length
+    ? state.subjects.filter(s => account.subject_ids.includes(s.id))
+    : await accountsApi.subjectsForAccount(accountId);
+
   fillSelect($('r_subject'), rows);
 }
 
 async function onAddSubject() {
   const name = $('s_name').value.trim();
   if (!name) throw new Error('Nome soggetto obbligatorio.');
-  await subjectsApi.create({ name, email: $('s_email').value.trim() || null, notes: $('s_notes').value.trim() || null });
+
+  await subjectsApi.create({
+    name,
+    email: $('s_email').value.trim() || null,
+    notes: $('s_notes').value.trim() || null
+  });
+
   $('s_name').value = '';
   $('s_email').value = '';
   $('s_notes').value = '';
+
   await reloadSubjects();
+  renderDefaultSubjectSelect();
   message('Soggetto salvato.');
 }
 
 async function onAddCategory() {
   const name = $('c_name').value.trim();
   if (!name) throw new Error('Nome categoria obbligatorio.');
+
   await categoriesApi.create({
     name,
     description: $('c_desc').value.trim() || null,
     color: $('c_color').value.trim() || null,
     icon: $('c_icon').value.trim() || null
   });
+
   $('c_name').value = '';
   $('c_desc').value = '';
   $('c_color').value = '';
   $('c_icon').value = '';
+
   await reloadCategories();
   message('Categoria salvata.');
 }
@@ -337,12 +303,20 @@ async function onAddCategory() {
 async function onAddAccount() {
   const name = $('a_name').value.trim();
   if (!name) throw new Error('Nome conto obbligatorio.');
+
   const subjectIds = getMultiSelectValues($('a_subjects'));
   if (!subjectIds.length) throw new Error('Seleziona almeno un soggetto per il conto.');
-  await accountsApi.create({ name, description: $('a_desc').value.trim() || null, subjectIds });
+
+  await accountsApi.create({
+    name,
+    description: $('a_desc').value.trim() || null,
+    subjectIds
+  });
+
   $('a_name').value = '';
   $('a_desc').value = '';
   [...$('a_subjects').options].forEach(o => { o.selected = false; });
+
   await reloadAccounts();
   message('Conto salvato.');
 }
@@ -350,6 +324,7 @@ async function onAddAccount() {
 async function onAddExpense() {
   const amount = parseAmount($('e_amount').value);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error('Importo non valido.');
+
   const payload = {
     account_id: $('e_account').value,
     subject_id: $('e_subject').value,
@@ -359,13 +334,17 @@ async function onAddExpense() {
     expense_date: $('e_date').value,
     notes: $('e_notes').value.trim() || null
   };
+
   validateExpensePayload(payload);
+
   const expense = await expensesApi.create(payload);
   const file = $('e_attach').files[0];
+
   if (file) {
     const meta = await fileToMeta(file);
     await attachmentsApi.upload({ expenseId: expense.id, ...meta });
   }
+
   clearExpenseForm();
   await refreshExpenses();
   await refreshStorageBadge();
@@ -390,6 +369,7 @@ function validateExpensePayload(payload) {
   if (!payload.category_id) throw new Error('Categoria obbligatoria.');
   if (!payload.description) throw new Error('Descrizione obbligatoria.');
   if (!payload.expense_date) throw new Error('Data obbligatoria.');
+
   const account = state.accounts.find(a => a.id === payload.account_id);
   if (!account || !(account.subject_ids || []).includes(payload.subject_id)) {
     throw new Error('Il soggetto selezionato non è associato al conto.');
@@ -397,11 +377,9 @@ function validateExpensePayload(payload) {
 }
 
 function renderExpenses() {
-
   const tbody = $('tbodyExpenses');
   if (tbody) tbody.innerHTML = '';
 
-  // ORDINA PER DATA CRESCENTE
   const expenses = [...state.expenses].sort(
     (a, b) => new Date(a.expense_date) - new Date(b.expense_date)
   );
@@ -443,61 +421,175 @@ function renderExpenses() {
     btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
   );
 
-  renderMobileExpenses();
+  renderMobileExpenses(expenses);
+}
+
+function renderMobileExpenses(expenses = state.expenses) {
+  const box = $('mobileExpensesList');
+  if (!box) return;
+
+  box.innerHTML = '';
+
+  if (!expenses.length) {
+    box.innerHTML = `<div class="mobileExpenseEmpty">Nessuna spesa trovata.</div>`;
+    return;
+  }
+
+  for (const item of expenses) {
+    const card = document.createElement('details');
+    card.className = 'mobileExpenseCard';
+
+    card.innerHTML = `
+      <summary>
+        <div class="mobileExpenseSummary">
+          <div class="mobileExpenseMain">
+            <div class="mobileExpenseTitle">${item.description || '-'}</div>
+            <div class="mobileExpenseMeta">${item.expense_date || '-'} · ${item.category_name || '-'}</div>
+          </div>
+          <div class="mobileExpenseAmount">${euro(item.amount)}</div>
+        </div>
+      </summary>
+
+      <div class="mobileExpenseBody">
+        <div class="mobileExpenseGrid">
+          <div><span class="muted">Soggetto</span><strong>${item.subject_name || '-'}</strong></div>
+          <div><span class="muted">Conto</span><strong>${item.account_name || '-'}</strong></div>
+          <div><span class="muted">Categoria</span><strong>${item.category_name || '-'}</strong></div>
+          <div><span class="muted">Data</span><strong>${item.expense_date || '-'}</strong></div>
+        </div>
+
+        ${item.notes ? `
+          <div class="mobileExpenseNotes">
+            <span class="muted">Note</span>
+            <div>${item.notes}</div>
+          </div>
+        ` : ''}
+
+        <div class="mobileExpenseAttachments">
+          <span class="muted">Ricevute</span>
+          <div>${renderAttachmentLinks(item.attachments)}</div>
+        </div>
+
+        <div class="actions mobileExpenseActions">
+          <button class="small" data-edit-expense="${item.id}">Modifica</button>
+          <button class="small danger" data-del-expense="${item.id}">Elimina</button>
+        </div>
+      </div>
+    `;
+
+    box.append(card);
+  }
+
+  box.querySelectorAll('[data-edit-expense]').forEach(btn =>
+    btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense))
+  );
+
+  box.querySelectorAll('[data-del-expense]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense))
+  );
+
+  box.querySelectorAll('[data-open-attachment]').forEach(btn =>
+    btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
+  );
 }
 
 function renderAttachmentLinks(attachments) {
   if (!attachments?.length) return '-';
-  return attachments.map(a => `<button class="linkBtn" data-open-attachment="${attachmentsApi.getPublicUrl(a.storage_path)}">${a.file_name}</button>`).join(' ');
+  return attachments
+    .map(a => `<button class="linkBtn" data-open-attachment="${attachmentsApi.getPublicUrl(a.storage_path)}">${a.file_name}</button>`)
+    .join(' ');
 }
 
 function renderSubjects() {
   const tbody = $('tbodySubjects');
   tbody.innerHTML = '';
+
   for (const item of state.subjects) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item.name}</td><td>${item.email || ''}</td><td class="actionsCell"><button class="small danger" data-del-subject="${item.id}">Elimina</button></td>`;
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.email || ''}</td>
+      <td class="actionsCell">
+        <button class="small danger" data-del-subject="${item.id}">Elimina</button>
+      </td>
+    `;
     tbody.append(tr);
   }
-  tbody.querySelectorAll('[data-del-subject]').forEach(btn => btn.addEventListener('click', () => onDeleteSubject(btn.dataset.delSubject)));
+
+  tbody.querySelectorAll('[data-del-subject]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteSubject(btn.dataset.delSubject))
+  );
 }
 
 function renderAccounts() {
   const tbody = $('tbodyAccounts');
   tbody.innerHTML = '';
+
   for (const item of state.accounts) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item.name}</td><td>${item.description || ''}</td><td>${(item.subject_names || []).join(', ')}</td><td class="actionsCell"><button class="small danger" data-del-account="${item.id}">Elimina</button></td>`;
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.description || ''}</td>
+      <td>${(item.subject_names || []).join(', ')}</td>
+      <td class="actionsCell">
+        <button class="small danger" data-del-account="${item.id}">Elimina</button>
+      </td>
+    `;
     tbody.append(tr);
   }
-  tbody.querySelectorAll('[data-del-account]').forEach(btn => btn.addEventListener('click', () => onDeleteAccount(btn.dataset.delAccount)));
+
+  tbody.querySelectorAll('[data-del-account]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteAccount(btn.dataset.delAccount))
+  );
 }
 
 function renderCategories() {
   const tbody = $('tbodyCategories');
   tbody.innerHTML = '';
+
   for (const item of state.categories) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item.name}</td><td>${item.description || ''}</td><td class="actionsCell"><button class="small danger" data-del-category="${item.id}">Elimina</button></td>`;
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.description || ''}</td>
+      <td class="actionsCell">
+        <button class="small danger" data-del-category="${item.id}">Elimina</button>
+      </td>
+    `;
     tbody.append(tr);
   }
-  tbody.querySelectorAll('[data-del-category]').forEach(btn => btn.addEventListener('click', () => onDeleteCategory(btn.dataset.delCategory)));
+
+  tbody.querySelectorAll('[data-del-category]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteCategory(btn.dataset.delCategory))
+  );
 }
 
 function renderRecurring() {
   const tbody = $('tbodyRecurring');
   tbody.innerHTML = '';
+
   for (const item of state.recurring) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item.description}</td><td>${item.frequency} / ${item.interval_value}</td><td>${item.last_generated_date || '-'}</td><td class="actionsCell"><button class="small danger" data-del-recurring="${item.id}">Elimina</button></td>`;
+    tr.innerHTML = `
+      <td>${item.description}</td>
+      <td>${item.frequency} / ${item.interval_value}</td>
+      <td>${item.last_generated_date || '-'}</td>
+      <td class="actionsCell">
+        <button class="small danger" data-del-recurring="${item.id}">Elimina</button>
+      </td>
+    `;
     tbody.append(tr);
   }
-  tbody.querySelectorAll('[data-del-recurring]').forEach(btn => btn.addEventListener('click', () => onDeleteRecurring(btn.dataset.delRecurring)));
+
+  tbody.querySelectorAll('[data-del-recurring]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteRecurring(btn.dataset.delRecurring))
+  );
 }
 
 async function openEditExpense(expenseId) {
   const item = state.expenses.find(x => x.id === expenseId);
   if (!item) return;
+
   $('m_expense_id').value = item.id;
   $('m_account').value = item.account_id;
   await syncEditSubjectsForAccount();
@@ -520,6 +612,7 @@ async function onSaveExpenseChanges() {
     expense_date: $('m_date').value,
     notes: $('m_notes').value.trim() || null
   };
+
   validateExpensePayload(payload);
   await expensesApi.update($('m_expense_id').value, payload);
   $('editExpenseDialog').close();
@@ -530,7 +623,11 @@ async function onSaveExpenseChanges() {
 async function onDeleteExpense(id) {
   const item = state.expenses.find(x => x.id === id);
   if (!item || !confirmDelete(item.description)) return;
-  for (const att of item.attachments || []) await attachmentsApi.remove(att);
+
+  for (const att of item.attachments || []) {
+    await attachmentsApi.remove(att);
+  }
+
   await expensesApi.remove(id);
   await refreshExpenses();
   await refreshStorageBadge();
@@ -540,6 +637,7 @@ async function onDeleteExpense(id) {
 async function onDeleteSubject(id) {
   const item = state.subjects.find(x => x.id === id);
   if (!item || !confirmDelete(item.name)) return;
+
   await subjectsApi.remove(id);
   await reloadAll();
   message('Soggetto eliminato.');
@@ -548,6 +646,7 @@ async function onDeleteSubject(id) {
 async function onDeleteAccount(id) {
   const item = state.accounts.find(x => x.id === id);
   if (!item || !confirmDelete(item.name)) return;
+
   await accountsApi.remove(id);
   await reloadAll();
   message('Conto eliminato.');
@@ -556,6 +655,7 @@ async function onDeleteAccount(id) {
 async function onDeleteCategory(id) {
   const item = state.categories.find(x => x.id === id);
   if (!item || !confirmDelete(item.name)) return;
+
   await categoriesApi.remove(id);
   await reloadAll();
   message('Categoria eliminata.');
@@ -575,14 +675,20 @@ async function onAddRecurring() {
     end_date: $('r_end').value || null,
     last_generated_date: null
   };
+
   validateExpensePayload({ ...payload, expense_date: payload.start_date });
-  if (!Number.isFinite(payload.amount) || payload.amount <= 0) throw new Error('Importo ricorrenza non valido.');
+
+  if (!Number.isFinite(payload.amount) || payload.amount <= 0) {
+    throw new Error('Importo ricorrenza non valido.');
+  }
+
   await recurringApi.create(payload);
   $('r_desc').value = '';
   $('r_amount').value = '';
   $('r_notes').value = '';
   $('r_end').value = '';
   $('r_interval').value = '1';
+
   await reloadRecurring();
   message('Ricorrenza salvata.');
 }
@@ -590,8 +696,10 @@ async function onAddRecurring() {
 async function onGenerateRecurring() {
   const today = new Date();
   const generated = [];
+
   for (const rec of state.recurring) {
     const dueDates = getDueDates(rec, today);
+
     for (const due of dueDates) {
       await expensesApi.create({
         account_id: rec.account_id,
@@ -604,10 +712,14 @@ async function onGenerateRecurring() {
       });
       generated.push(`${rec.description} (${due})`);
     }
+
     if (dueDates.length) {
-      await recurringApi.update(rec.id, { last_generated_date: dueDates[dueDates.length - 1] });
+      await recurringApi.update(rec.id, {
+        last_generated_date: dueDates[dueDates.length - 1]
+      });
     }
   }
+
   await reloadRecurring();
   await refreshExpenses();
   message(generated.length ? `Generate ${generated.length} spese ricorrenti.` : 'Nessuna ricorrenza dovuta.');
@@ -617,12 +729,17 @@ function getDueDates(rec, untilDate) {
   const out = [];
   const start = new Date(rec.start_date);
   const end = rec.end_date ? new Date(rec.end_date) : null;
-  let current = rec.last_generated_date ? nextDate(new Date(rec.last_generated_date), rec.frequency, rec.interval_value) : start;
+
+  let current = rec.last_generated_date
+    ? nextDate(new Date(rec.last_generated_date), rec.frequency, rec.interval_value)
+    : start;
+
   while (current <= untilDate) {
     if (!end || current <= end) out.push(ymd(current));
     current = nextDate(current, rec.frequency, rec.interval_value);
     if (out.length > 100) break;
   }
+
   return out;
 }
 
@@ -638,6 +755,7 @@ function nextDate(date, frequency, interval) {
 async function onDeleteRecurring(id) {
   const item = state.recurring.find(x => x.id === id);
   if (!item || !confirmDelete(item.description)) return;
+
   await recurringApi.remove(id);
   await reloadRecurring();
   message('Ricorrenza eliminata.');
@@ -666,7 +784,12 @@ async function onExportExpensesCsv() {
     expense_date: x.expense_date,
     notes: x.notes || ''
   }));
-  downloadText(`spese_${ymd(new Date())}.csv`, exportExpensesCsv(normalized), 'text/csv;charset=utf-8');
+
+  downloadText(
+    `spese_${ymd(new Date())}.csv`,
+    exportExpensesCsv(normalized),
+    'text/csv;charset=utf-8'
+  );
 }
 
 async function onExportRecurringCsv() {
@@ -685,15 +808,22 @@ async function onExportRecurringCsv() {
     end_date: x.end_date || '',
     last_generated_date: x.last_generated_date || ''
   }));
-  downloadText(`ricorrenze_${ymd(new Date())}.csv`, exportRecurringCsv(normalized), 'text/csv;charset=utf-8');
+
+  downloadText(
+    `ricorrenze_${ymd(new Date())}.csv`,
+    exportRecurringCsv(normalized),
+    'text/csv;charset=utf-8'
+  );
 }
 
 async function onImportCsv() {
   const file = $('importFile').files[0];
   if (!file) throw new Error('Seleziona un file CSV.');
+
   const text = await file.text();
   const kind = $('importKind').value;
   let count = 0;
+
   if (kind === 'expenses') {
     const rows = importExpensesCsv(text);
     for (const row of rows) validateExpensePayload(row);
@@ -707,6 +837,7 @@ async function onImportCsv() {
     count = rows.length;
     await reloadRecurring();
   }
+
   $('importResult').textContent = `Righe importate: ${count}`;
   message('Import completato.');
 }
@@ -719,6 +850,7 @@ async function onPreviewReport() {
     account_id: $('rp_account').value || null,
     category_id: $('rp_category').value || null
   });
+
   openPdfPreview(buildReportHtml({
     filters: {
       from: $('rp_from').value,
