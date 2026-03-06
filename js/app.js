@@ -10,6 +10,7 @@ const state = {
   categories: [],
   expenses: [],
   recurring: []
+  defaultSubjectId: localStorage.getItem('defaultSubjectId') || ''
 };
 
 bootstrap().catch(handleError);
@@ -53,6 +54,9 @@ function bindActions() {
   $('btnExportRecurringCsv').addEventListener('click', onExportRecurringCsv);
   $('btnImportCsv').addEventListener('click', onImportCsv);
   $('btnPreviewReport').addEventListener('click', onPreviewReport);
+  $('defaultSubjectSelect')?.addEventListener('change', (e) => {
+  setDefaultSubjectId(e.target.value || '');
+});
 }
 
 function initMobileCollapsibles() {
@@ -66,6 +70,46 @@ function initMobileCollapsibles() {
       card.classList.toggle('mobileOpen');
     });
   });
+}
+
+function getDefaultSubjectId() {
+  return state.defaultSubjectId || '';
+}
+
+function setDefaultSubjectId(subjectId) {
+  state.defaultSubjectId = subjectId || '';
+  localStorage.setItem('defaultSubjectId', state.defaultSubjectId);
+}
+
+function renderDefaultSubjectSelect() {
+  const sel = $('defaultSubjectSelect');
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">Nessuno</option>';
+
+  for (const s of state.subjects) {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name || s.email || s.id;
+    sel.appendChild(opt);
+  }
+
+  sel.value = getDefaultSubjectId();
+}
+
+function applyDefaultSubjectToExpenseForm() {
+  const subjectId = getDefaultSubjectId();
+  if ($('e_subject')) $('e_subject').value = subjectId;
+}
+
+function applyDefaultSubjectToFilters() {
+  const subjectId = getDefaultSubjectId();
+  if ($('f_subject')) $('f_subject').value = subjectId;
+}
+
+function applyDefaultSubjectToReport() {
+  const subjectId = getDefaultSubjectId();
+  if ($('rp_subject')) $('rp_subject').value = subjectId;
 }
 
 function renderMobileExpenses() {
@@ -164,6 +208,10 @@ async function reloadAll() {
   await Promise.all([reloadSubjects(), reloadCategories(), reloadAccounts(), reloadRecurring()]);
   await refreshExpenses();
   await refreshStorageBadge();
+  renderDefaultSubjectSelect();
+  applyDefaultSubjectToExpenseForm();
+  applyDefaultSubjectToFilters();
+  applyDefaultSubjectToReport();
 }
 
 async function reloadSubjects() {
@@ -325,11 +373,15 @@ async function onAddExpense() {
 }
 
 function clearExpenseForm() {
-  $('e_desc').value = '';
-  $('e_amount').value = '';
-  $('e_notes').value = '';
-  $('e_attach').value = '';
-  $('e_date').value = ymd(new Date());
+  if ($('e_account')) $('e_account').value = '';
+  if ($('e_category')) $('e_category').value = '';
+  if ($('e_desc')) $('e_desc').value = '';
+  if ($('e_amount')) $('e_amount').value = '';
+  if ($('e_notes')) $('e_notes').value = '';
+  if ($('e_attach')) $('e_attach').value = '';
+  if ($('e_date')) $('e_date').value = ymd(new Date());
+
+  applyDefaultSubjectToExpenseForm();
 }
 
 function validateExpensePayload(payload) {
@@ -595,7 +647,7 @@ function resetExpenseFilters() {
   const { from, to } = todayRange();
   $('f_from').value = from;
   $('f_to').value = to;
-  $('f_subject').value = '';
+  applyDefaultSubjectToFilters();
   $('f_account').value = '';
   $('f_category').value = '';
   $('f_text').value = '';
