@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Gestione Spese db</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="manifest" href="./manifest.json" />
@@ -22,10 +22,10 @@
 
   <nav class="tabsBar">
     <button class="tab active" data-tab="spese">Spese</button>
+    <button class="tab" data-tab="ricorrenze">Ricorrenze</button>
     <button class="tab" data-tab="soggetti">Soggetti</button>
     <button class="tab" data-tab="conti">Conti</button>
     <button class="tab" data-tab="categorie">Categorie</button>
-    <button class="tab" data-tab="ricorrenze">Ricorrenze</button>
     <button class="tab" data-tab="importexport">Import/Export</button>
     <button class="tab" data-tab="report">Report</button>
     <button class="tab" data-tab="impostazioni">Impostazioni</button>
@@ -136,27 +136,35 @@
     </div>
   </div>
 </div>
-      <div class="card">
-  <div class="split">
-    <h2>Elenco spese</h2>
+<div class="card collapsibleCard mobileOpen" id="cardExpenseList">
+  <div class="split collapsibleHeader">
+    <button class="collapsibleToggle grow" type="button" data-collapse-target="bodyExpenseList">
+      <span>Elenco spese</span>
+      <span class="collapseIcon">▾</span>
+    </button>
     <button id="btnRefreshExpenses" class="ghost" type="button">Aggiorna</button>
   </div>
-  <div class="tableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Soggetto</th>
-          <th>Conto</th>
-          <th>Categoria</th>
-          <th>Descrizione</th>
-          <th class="r">Importo</th>
-          <th>Ricevute</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tbodyExpenses"></tbody>
-    </table>
+
+  <div class="collapsibleBody" id="bodyExpenseList">
+    <div id="mobileExpensesList" class="mobileExpensesList"></div>
+
+    <div class="tableWrap desktopExpensesTable">
+      <table class="expensesTable">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Soggetto</th>
+            <th>Conto</th>
+            <th>Categoria</th>
+            <th>Descrizione</th>
+            <th class="r">Importo</th>
+            <th>Ricevute</th>
+            <th class="r">Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyExpenses"></tbody>
+      </table>
+    </div>
   </div>
 </div>
     </section>
