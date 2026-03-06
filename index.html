@@ -9,14 +9,19 @@
   <meta name="theme-color" content="#0f1220" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>Gestione Spese</h1>
-      <div class="muted">Versione solo database remoto</div>
+<header class="topbar">
+  <div>
+    <h1>Gestione Spese</h1>
+    <div class="muted">Versione solo database remoto</div>
+  </div>
+  <div class="topbarActions">
+    <div class="topbarSelect">
+      <label for="defaultSubjectSelect">Soggetto predefinito</label>
+      <select id="defaultSubjectSelect"></select>
     </div>
-    <div class="topbarActions">
-      <button id="btnPing" class="ghost" type="button">Test connessione</button>
-      <span id="connectionBadge" class="pill">Non connesso</span>
+    <span id="connectionBadge" class="pill">Non connesso</span>
+  </div>
+</header>
     </div>
   </header>
 
@@ -169,76 +174,7 @@
       </div>
     </div>
   </div>
-    </section>
-
-    <section id="tab-soggetti" class="panel hidden">
-      <div class="grid2">
-        <div class="card">
-          <h2>Nuovo soggetto</h2>
-          <div class="row2">
-            <div>
-              <label>Nome</label>
-              <input id="s_name" type="text" />
-            </div>
-            <div>
-              <label>Email</label>
-              <input id="s_email" type="email" />
-            </div>
-          </div>
-          <div>
-            <label>Note</label>
-            <textarea id="s_notes" rows="3"></textarea>
-          </div>
-          <div class="actions">
-            <button id="btnAddSubject" class="primary" type="button">Salva soggetto</button>
-          </div>
-        </div>
-        <div class="card">
-          <h2>Soggetti</h2>
-          <div class="tableWrap slim">
-            <table>
-              <thead><tr><th>Nome</th><th>Email</th><th></th></tr></thead>
-              <tbody id="tbodySubjects"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="tab-conti" class="panel hidden">
-      <div class="grid2">
-        <div class="card">
-          <h2>Nuovo conto</h2>
-          <div class="row2">
-            <div>
-              <label>Nome</label>
-              <input id="a_name" type="text" />
-            </div>
-            <div>
-              <label>Descrizione</label>
-              <input id="a_desc" type="text" />
-            </div>
-          </div>
-          <div>
-            <label>Soggetti associati</label>
-            <select id="a_subjects" multiple size="8"></select>
-            <div class="hint">Tieni premuto CTRL o CMD per selezione multipla.</div>
-          </div>
-          <div class="actions">
-            <button id="btnAddAccount" class="primary" type="button">Salva conto</button>
-          </div>
-        </div>
-        <div class="card">
-          <h2>Conti</h2>
-          <div class="tableWrap slim">
-            <table>
-              <thead><tr><th>Nome</th><th>Descrizione</th><th>Soggetti</th><th></th></tr></thead>
-              <tbody id="tbodyAccounts"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
+</section>
 
     <section id="tab-categorie" class="panel hidden">
       <div class="grid2">
@@ -433,6 +369,9 @@
           <li>Crea il bucket <code>receipts</code>.</li>
           <li>Apri l'app e usa “Test connessione”.</li>
         </ol>
+        <div class="actions">
+          <button id="btnPing" class="ghost" type="button">Test connessione</button>
+        </div>
       </div>
     </section>
   </main>
