@@ -60,3 +60,146 @@ dialog { border: none; border-radius: 20px; padding: 0; width: min(760px, 92vw);
   .grid2, .row2 { grid-template-columns: 1fr; }
   .topbar { flex-direction: column; align-items: flex-start; }
 }
+.collapsibleToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.collapsibleToggle.grow {
+  flex: 1;
+}
+
+.collapseIcon {
+  transition: transform .2s ease;
+}
+
+.collapsibleBody {
+  margin-top: 14px;
+}
+
+.mobileExpensesList {
+  display: none;
+}
+
+.mobileExpenseCard {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel2);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.mobileExpenseCard summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px;
+}
+
+.mobileExpenseCard summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobileExpenseSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobileExpenseTitle {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.mobileExpenseAmount {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mobileExpenseBody {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--line);
+}
+
+.mobileExpenseGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mobileExpenseGrid span,
+.mobileExpenseNotes span,
+.mobileExpenseAttachments span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.mobileExpenseNotes,
+.mobileExpenseAttachments {
+  margin-top: 12px;
+}
+
+.mobileExpenseEmpty {
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .collapsibleCard .collapsibleBody {
+    display: none;
+  }
+
+  .collapsibleCard.mobileOpen .collapsibleBody {
+    display: block;
+  }
+
+  .collapsibleCard.mobileOpen .collapseIcon {
+    transform: rotate(180deg);
+  }
+
+  .desktopExpensesTable {
+    display: none;
+  }
+
+  .mobileExpensesList {
+    display: block;
+  }
+
+  .collapsibleHeader {
+    align-items: stretch;
+  }
+
+  .collapsibleHeader .ghost {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 901px) {
+  .collapsibleToggle {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: default;
+  }
+
+  .collapseIcon {
+    display: none;
+  }
+
+  .mobileExpensesList {
+    display: none !important;
+  }
+
+  .desktopExpensesTable {
+    display: block;
+  }
+}
