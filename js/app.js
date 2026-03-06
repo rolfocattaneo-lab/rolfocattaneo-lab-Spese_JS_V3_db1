@@ -17,6 +17,7 @@ bootstrap().catch(handleError);
 async function bootstrap() {
   bindTabs();
   bindActions();
+  initMobileCollapsibles();
   setDefaultDates();
   await reloadAll();
 }
@@ -51,6 +52,80 @@ function bindActions() {
   $('btnExportRecurringCsv').addEventListener('click', onExportRecurringCsv);
   $('btnImportCsv').addEventListener('click', onImportCsv);
   $('btnPreviewReport').addEventListener('click', onPreviewReport);
+}
+
+function initMobileCollapsibles() {
+  document.querySelectorAll('.collapsibleToggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth > 900) return;
+
+      const card = btn.closest('.collapsibleCard');
+      if (!card) return;
+
+      card.classList.toggle('mobileOpen');
+    });
+  });
+}
+
+function renderMobileExpenses() {
+  const box = $('mobileExpensesList');
+  if (!box) return;
+
+  box.innerHTML = '';
+
+  if (!state.expenses.length) {
+    box.innerHTML = `<div class="mobileExpenseEmpty">Nessuna spesa trovata.</div>`;
+    return;
+  }
+
+  for (const item of state.expenses) {
+    const card = document.createElement('details');
+    card.className = 'mobileExpenseCard';
+
+    card.innerHTML = `
+      <summary>
+        <div class="mobileExpenseSummary">
+          <div class="mobileExpenseTitle">${item.description || '-'}</div>
+          <div class="mobileExpenseAmount">${euro(item.amount)}</div>
+        </div>
+      </summary>
+
+      <div class="mobileExpenseBody">
+        <div class="mobileExpenseGrid">
+          <div><span class="muted">Data</span><strong>${item.expense_date || '-'}</strong></div>
+          <div><span class="muted">Soggetto</span><strong>${item.subject_name || '-'}</strong></div>
+          <div><span class="muted">Conto</span><strong>${item.account_name || '-'}</strong></div>
+          <div><span class="muted">Categoria</span><strong>${item.category_name || '-'}</strong></div>
+        </div>
+
+        ${item.notes ? `<div class="mobileExpenseNotes"><span class="muted">Note</span><div>${item.notes}</div></div>` : ''}
+
+        <div class="mobileExpenseAttachments">
+          <span class="muted">Ricevute</span>
+          <div>${renderAttachmentLinks(item.attachments)}</div>
+        </div>
+
+        <div class="actions">
+          <button class="small" data-edit-expense="${item.id}">Modifica</button>
+          <button class="small danger" data-del-expense="${item.id}">Elimina</button>
+        </div>
+      </div>
+    `;
+
+    box.append(card);
+  }
+
+  box.querySelectorAll('[data-edit-expense]').forEach(btn =>
+    btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense))
+  );
+
+  box.querySelectorAll('[data-del-expense]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense))
+  );
+
+  box.querySelectorAll('[data-open-attachment]').forEach(btn =>
+    btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
+  );
 }
 
 function setDefaultDates() {
@@ -264,8 +339,10 @@ function renderExpenses() {
   const tbody = $('tbodyExpenses');
   tbody.innerHTML = '';
   let total = 0;
+
   for (const item of state.expenses) {
     total += Number(item.amount || 0);
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.expense_date}</td>
@@ -281,12 +358,21 @@ function renderExpenses() {
       </td>`;
     tbody.append(tr);
   }
+
   $('kpiFiltered').textContent = `Righe: ${state.expenses.length}`;
   $('kpiTotal').textContent = `Totale: ${euro(total)}`;
 
-  tbody.querySelectorAll('[data-edit-expense]').forEach(btn => btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense)));
-  tbody.querySelectorAll('[data-del-expense]').forEach(btn => btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense)));
-  tbody.querySelectorAll('[data-open-attachment]').forEach(btn => btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank')));
+  tbody.querySelectorAll('[data-edit-expense]').forEach(btn =>
+    btn.addEventListener('click', () => openEditExpense(btn.dataset.editExpense))
+  );
+  tbody.querySelectorAll('[data-del-expense]').forEach(btn =>
+    btn.addEventListener('click', () => onDeleteExpense(btn.dataset.delExpense))
+  );
+  tbody.querySelectorAll('[data-open-attachment]').forEach(btn =>
+    btn.addEventListener('click', () => window.open(btn.dataset.openAttachment, '_blank'))
+  );
+
+  renderMobileExpenses();
 }
 
 function renderAttachmentLinks(attachments) {
